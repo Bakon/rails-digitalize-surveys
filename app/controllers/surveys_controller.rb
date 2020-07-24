@@ -1,5 +1,5 @@
 class SurveysController < ApplicationController
-  before_action :set_survey, only: [:show, :edit, :update, :destroy]
+  before_action :set_survey, only: %i[show edit update destroy answers]
 
   # GET /surveys
   # GET /surveys.json
@@ -9,8 +9,7 @@ class SurveysController < ApplicationController
 
   # GET /surveys/1
   # GET /surveys/1.json
-  def show
-  end
+  def show; end
 
   # GET /surveys/new
   def new
@@ -18,8 +17,7 @@ class SurveysController < ApplicationController
   end
 
   # GET /surveys/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /surveys
   # POST /surveys.json
@@ -61,14 +59,24 @@ class SurveysController < ApplicationController
     end
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_survey
-      @survey = Survey.find(params[:id])
-    end
+  def answers
+    @participants = participant.all
+    @questions = @survey.questions
+  end
 
-    # Only allow a list of trusted parameters through.
-    def survey_params
-      params.require(:survey).permit(:name)
-    end
+  private
+
+  # Use callbacks to share common setup or constraints between actions.
+  def set_survey
+    @survey = Survey.find(params[:id])
+  end
+
+  def survey_params
+    params.require(:survey).permit(
+      :name,
+      questions_attributes: [
+        :id, :content, { answers_attributes: %i[id content participant_ids] }
+      ]
+    )
+  end
 end
